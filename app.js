@@ -15,8 +15,12 @@ var app = express();
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+app.set('optMDB', (process.argv.indexOf('--mdb') > -1));
+app.set('optQuiet', (process.argv.indexOf('--quiet') > -1));
+
 app.use(express.favicon());
-app.use(express.logger('dev'));
+if(!app.get('optQuiet')) app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
@@ -30,6 +34,16 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 
+if(app.get('optMDB')) {
+  require('./db')(app, function(err) {
+    if(err) throw err;
+
+    http.createServer(app).listen(app.get('port'), function(){
+      if(!app.get('optQuiet'))
+        console.log('Express server listening on port ' + app.get('port'));
+    });
+  });
+} else {
 app.get('/new', game.new);
 app.post('/:id', game.save);
 app.get('/:id', game.detail);
@@ -37,3 +51,4 @@ app.get('/:id', game.detail);
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+}

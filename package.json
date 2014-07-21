@@ -4,14 +4,23 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+
+    "start-mdb": "node app.js --mdb",
+    "test-mdb": "node node_modules/mocha/bin/mocha --timeout 10000 --slow 2000 --reporter spec test/test-mdb.js"
+  },
+  "engines": {
+    "node": ">=0.10.22"
   },
   "dependencies": {
     "express": "3.4.4",
-    "ejs": "*",
+    "ejs": "1.0.x",
     "uuid": "~1.4.1"
   },
-	"engines": {
-		"node": "0.10.22"
-	}
+  "devDependencies": {
+    "mongoose": "3.8.x",
+    "mocha": "1.20.x",
+    "chai": "1.9.x",
+    "request": "2.x"
+  }
 }

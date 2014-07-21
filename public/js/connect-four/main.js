@@ -272,7 +272,7 @@ function ConnectFourViewModel() {
      * @param {ConnectFourCell} cell The cell the player clicked on.
      */
     self.selectCell = function(cell) {
-        if (self.gameWinner()) {
+        if (self.currentGame().isWon()) {
             self.displayTimedNotification(
                 "Game is over. Please quit this game and start a new one.",
                 "alert");
@@ -299,6 +299,14 @@ function ConnectFourViewModel() {
             self.displayTimedNotification("Invalid move. Please try again.", "alert");
             return;
         }
+
+        // Save the current state
+        $.ajax({
+            url: "/" + self.currentGame().id,
+            type: "POST",
+            data: JSON.stringify(self.currentGame().serializedGrid()),
+            contentType: "application/json"
+        });
 
         var won = self.currentGame().isWon();
         if (won) {
@@ -398,11 +406,18 @@ function ConnectFourViewModel() {
                     // the ID is known to us already
                     self.hideLoading();
                     self.currentGame(new ConnectFourGame(gameId, data.data));
+                    if(self.currentGame().isWon()) {
+                        self.displayTimedNotification(
+                            "Game is over. Please quit this game and start a new one.",
+                            "alert");
+                        return;
+                    }
                     self.displayTimedNotification(
                         "Loaded '" + gameId + "'",
                         "success");
                     // Start play!
-                    self.currentPlayer(1);
+                    var curPlayer = (data.currentPlayer && !isNaN(data.currentPlayer)) ? data.currentPlayer : 1;
+                    self.currentPlayer(curPlayer);
                 },
                 error: function(xhr, txtStatus, error) {
                     // Display the returned error message to the user in case
